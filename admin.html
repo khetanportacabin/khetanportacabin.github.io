@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel — Khetan Industries</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0D1B2A;--navy2:#152234;--accent:#E8A020;--accent2:#F5B844;
+  --white:#fff;--light:#F4F6F9;--gray:#8898aa;--text:#1a2332;
+  --green:#1a7a4a;--red:#c0392b;--border:rgba(0,0,0,0.1);
+}
+body{font-family:'Barlow',sans-serif;background:#f0f2f5;color:var(--text);min-height:100vh}
+/* LOGIN */
+#login-screen{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:9999}
+.login-box{background:#fff;border-radius:16px;padding:48px 40px;width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.4)}
+.login-logo{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;color:var(--navy);margin-bottom:4px}
+.login-logo span{color:var(--accent)}
+.login-sub{font-size:13px;color:var(--gray);margin-bottom:32px}
+.login-input{width:100%;padding:12px 16px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;font-family:'Barlow',sans-serif;outline:none;margin-bottom:14px;transition:border-color 0.2s}
+.login-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,160,32,0.12)}
+.login-btn{width:100%;background:var(--navy);color:#fff;border:none;padding:13px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Barlow',sans-serif;transition:background 0.2s}
+.login-btn:hover{background:#1a2e45}
+.login-err{color:var(--red);font-size:13px;margin-top:10px;display:none}
+/* HEADER */
+header{background:var(--navy);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.header-brand{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;color:#fff}
+.header-brand span{color:var(--accent)}
+.header-actions{display:flex;gap:12px;align-items:center}
+.header-link{color:rgba(255,255,255,0.7);text-decoration:none;font-size:13px;padding:6px 14px;border-radius:6px;border:1px solid rgba(255,255,255,0.2);transition:all 0.2s}
+.header-link:hover{background:rgba(255,255,255,0.1);color:#fff}
+.logout-btn{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px;font-family:'Barlow',sans-serif;transition:all 0.2s}
+.logout-btn:hover{background:rgba(255,255,255,0.15);color:#fff}
+/* TABS */
+.tabs{background:#fff;border-bottom:1px solid var(--border);padding:0 32px;display:flex;gap:0}
+.tab{padding:14px 24px;font-size:14px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;color:var(--gray);transition:all 0.2s;user-select:none}
+.tab.active{color:var(--navy);border-color:var(--accent)}
+.tab:hover:not(.active){color:var(--navy);background:#f9f9f9}
+/* CONTENT */
+.content{padding:32px;max-width:1100px;margin:0 auto}
+.panel{display:none}
+.panel.active{display:block}
+/* CARDS */
+.card{background:#fff;border-radius:14px;padding:28px;margin-bottom:24px;border:1px solid rgba(0,0,0,0.07)}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;color:var(--navy);margin-bottom:20px;text-transform:uppercase;letter-spacing:0.5px;display:flex;align-items:center;gap:10px}
+.card-title .badge{background:var(--accent);color:var(--navy);font-size:11px;padding:2px 8px;border-radius:4px;font-weight:700;font-family:'Barlow',sans-serif}
+/* FORM ELEMENTS */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.form-row.full{grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:11px;font-weight:700;color:var(--navy);letter-spacing:0.5px;text-transform:uppercase}
+.form-input,.form-select,.form-textarea{border:1.5px solid var(--border);border-radius:8px;padding:10px 13px;font-size:14px;font-family:'Barlow',sans-serif;color:var(--text);outline:none;transition:border-color 0.2s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,160,32,0.1)}
+.form-textarea{min-height:80px;resize:vertical}
+/* BUTTONS */
+.btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:'Barlow',sans-serif;transition:all 0.2s;display:inline-flex;align-items:center;gap:7px}
+.btn-primary{background:var(--navy);color:#fff}
+.btn-primary:hover{background:#1a2e45;transform:translateY(-1px)}
+.btn-accent{background:var(--accent);color:var(--navy)}
+.btn-accent:hover{background:var(--accent2)}
+.btn-danger{background:#fee;color:var(--red);border:1px solid #fcc}
+.btn-danger:hover{background:#fdd;border-color:var(--red)}
+.btn-sm{padding:6px 14px;font-size:12px}
+.btn-success{background:#e6f7ef;color:var(--green);border:1px solid #b2dfce}
+.btn-success:hover{background:#d0f0e0}
+/* PRODUCT GRID */
+.products-list{display:flex;flex-direction:column;gap:14px}
+.product-item{background:var(--light);border:1px solid rgba(0,0,0,0.07);border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:16px}
+.product-item-img{width:72px;height:56px;border-radius:8px;object-fit:cover;background:var(--navy);flex-shrink:0;border:1px solid rgba(0,0,0,0.08)}
+.product-item-img-fallback{width:72px;height:56px;border-radius:8px;background:linear-gradient(135deg,var(--navy),#1e3a55);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.product-item-info{flex:1;min-width:0}
+.product-item-name{font-weight:700;font-size:15px;color:var(--navy);margin-bottom:3px}
+.product-item-desc{font-size:12px;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.product-item-tag{font-size:10px;background:var(--accent);color:var(--navy);padding:2px 8px;border-radius:4px;font-weight:700;margin-right:auto}
+.product-item-actions{display:flex;gap:8px;flex-shrink:0}
+/* SLIDER GRID */
+.slider-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.slider-item{background:var(--light);border:1px solid rgba(0,0,0,0.07);border-radius:12px;overflow:hidden}
+.slider-item-img{width:100%;height:130px;object-fit:cover;background:var(--navy);display:block}
+.slider-item-body{padding:12px}
+.slider-item-title{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:8px;word-break:break-all}
+.slider-item-actions{display:flex;gap:8px}
+.slider-active-badge{font-size:10px;background:#e6f7ef;color:var(--green);padding:2px 8px;border-radius:4px;font-weight:700;display:inline-block;margin-bottom:8px}
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:#fff;padding:14px 22px;border-radius:10px;font-size:14px;font-weight:600;z-index:9999;transform:translateY(100px);opacity:0;transition:all 0.3s;border-left:4px solid var(--accent)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-left-color:#25D366}
+.toast.error{border-left-color:var(--red)}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:16px;padding:32px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:22px;color:var(--navy);text-transform:uppercase;margin-bottom:24px}
+.modal-actions{display:flex;gap:12px;margin-top:24px;justify-content:flex-end}
+/* IMAGE PREVIEW */
+.img-preview{width:100%;height:140px;border-radius:8px;object-fit:cover;margin-top:8px;border:1px solid var(--border);display:block;background:var(--light)}
+.img-preview.hidden{display:none}
+/* INFO BOX */
+.info-box{background:#e6f0fb;border:1px solid #b3cef0;border-radius:10px;padding:16px 18px;margin-bottom:20px;font-size:13px;color:#1a4a8a;line-height:1.6}
+.info-box strong{display:block;margin-bottom:6px;font-size:14px}
+/* SECTION DIVIDER */
+.section-divider{border:none;border-top:1px solid var(--border);margin:28px 0}
+/* IMAGE HOSTING INFO */
+.image-hosting-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+.hosting-option{border:1px solid var(--border);border-radius:10px;padding:16px;background:var(--light)}
+.hosting-name{font-weight:700;font-size:14px;color:var(--navy);margin-bottom:4px}
+.hosting-url{font-size:12px;color:var(--accent);font-weight:600;margin-bottom:8px}
+.hosting-desc{font-size:12px;color:var(--gray);line-height:1.5}
+.hosting-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;font-weight:700;margin-bottom:6px}
+.badge-free{background:#e6f7ef;color:var(--green)}
+.badge-easy{background:#e6f0fb;color:#1a4a8a}
+@media(max-width:640px){
+  .content{padding:16px}
+  .form-row{grid-template-columns:1fr}
+  .image-hosting-grid{grid-template-columns:1fr}
+  .product-item-desc{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo"><span>Khetan</span> Industries</div>
+    <div class="login-sub">Admin Panel — Secure Access</div>
+    <input type="password" class="login-input" id="admin-pass" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Login →</button>
+    <div class="login-err" id="login-err">Incorrect password. Try again.</div>
+    <div style="margin-top:20px;font-size:11px;color:#ccc">Default password: <code style="background:#f0f0f0;color:#333;padding:1px 6px;border-radius:3px">khetan2025</code></div>
+  </div>
+</div>
+
+<!-- MAIN ADMIN UI (hidden until login) -->
+<div id="admin-ui" style="display:none">
+
+<header>
+  <div class="header-brand"><span>Khetan</span> Admin Panel</div>
+  <div class="header-actions">
+    <a href="index.html" target="_blank" class="header-link">🌐 View Website</a>
+    <button class="logout-btn" onclick="doLogout()">Logout</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('products')">🏗️ Products</div>
+  <div class="tab" onclick="switchTab('slider')">🖼️ Hero Slider</div>
+  <div class="tab" onclick="switchTab('images')">📷 Image Hosting</div>
+  <div class="tab" onclick="switchTab('howto')">📖 How To Use</div>
+</div>
+
+<!-- PRODUCTS TAB -->
+<div class="content" id="tab-products" style="display:block">
+
+  <div class="card">
+    <div class="card-title">Manage Products <span class="badge" id="product-count-badge">Loading...</span></div>
+    
+    <button class="btn btn-accent" onclick="openAddProductModal()" style="margin-bottom:20px">+ Add New Product</button>
+
+    <div class="products-list" id="products-list">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+
+</div>
+
+<!-- SLIDER TAB -->
+<div class="content" id="tab-slider" style="display:none">
+
+  <div class="card">
+    <div class="card-title">Hero Slider Images</div>
+    
+    <div class="info-box">
+      <strong>ℹ️ How the slider works</strong>
+      These are the background images shown in the sliding hero section at the top of your homepage. You can add up to 6 slides. Use direct image URLs (see "Image Hosting" tab for how to get free image links).
+    </div>
+
+    <button class="btn btn-accent" onclick="openAddSlideModal()" style="margin-bottom:20px">+ Add New Slide</button>
+
+    <div class="slider-list" id="slider-list">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+
+</div>
+
+<!-- IMAGE HOSTING TAB -->
+<div class="content" id="tab-images" style="display:none">
+
+  <div class="card">
+    <div class="card-title">📷 Where to Get Free Image Links</div>
+
+    <div class="info-box">
+      <strong>You need a direct image URL (ending in .jpg or .png) to use images on the website.</strong>
+      Here are the best free options to upload your own photos and get a direct link:
+    </div>
+
+    <div class="image-hosting-grid">
+
+      <div class="hosting-option">
+        <span class="hosting-badge badge-free">FREE</span>
+        <span class="hosting-badge badge-easy">EASIEST</span>
+        <div class="hosting-name">ImgBB</div>
+        <div class="hosting-url">imgbb.com</div>
+        <div class="hosting-desc">
+          Upload any photo → get a direct link instantly. No account required for basic uploads. Perfect for product photos and slider images.<br><br>
+          <strong>Steps:</strong><br>
+          1. Go to imgbb.com<br>
+          2. Click "Start uploading"<br>
+          3. Upload your photo<br>
+          4. Right-click the image → "Copy image address"<br>
+          5. Paste URL in the admin panel above
+        </div>
+      </div>
+
+      <div class="hosting-option">
+        <span class="hosting-badge badge-free">FREE</span>
+        <div class="hosting-name">Postimages</div>
+        <div class="hosting-url">postimages.org</div>
+        <div class="hosting-desc">
+          Very simple image hosting. Upload and get "Direct link" immediately. No registration needed.<br><br>
+          <strong>Steps:</strong><br>
+          1. Go to postimages.org<br>
+          2. Click "Choose images"<br>
+          3. Upload your photo<br>
+          4. Copy the "Direct link" shown<br>
+          5. Paste URL in admin panel
+        </div>
+      </div>
+
+      <div class="hosting-option">
+        <span class="hosting-badge badge-free">FREE</span>
+        <div class="hosting-name">Google Drive</div>
+        <div class="hosting-url">drive.google.com</div>
+        <div class="hosting-desc">
+          If you use Google Drive, you can host images there. Share the file publicly and convert the share link.<br><br>
+          <strong>Steps:</strong><br>
+          1. Upload photo to Drive<br>
+          2. Right-click → "Share" → "Anyone with link"<br>
+          3. Copy the link, note the file ID<br>
+          4. URL format: https://drive.google.com/uc?id=FILE_ID
+        </div>
+      </div>
+
+      <div class="hosting-option">
+        <span class="hosting-badge badge-free">FREE</span>
+        <div class="hosting-name">GitHub (When Deployed)</div>
+        <div class="hosting-url">github.com</div>
+        <div class="hosting-desc">
+          Once your site is on GitHub Pages, put images in an "images" folder in your repo. Then use a relative path like: images/product1.jpg<br><br>
+          This is the <strong>best long-term solution</strong> — images load fast and are free forever on GitHub Pages.
+        </div>
+      </div>
+
+    </div>
+
+    <hr class="section-divider">
+
+    <div class="card-title" style="margin-top:0">Test Your Image URL</div>
+    <div class="form-row full">
+      <div class="form-group">
+        <label class="form-label">Paste Image URL to Test</label>
+        <input type="url" class="form-input" id="test-url-input" placeholder="https://example.com/image.jpg" oninput="testImageURL(this.value)">
+        <img id="test-img-preview" class="img-preview hidden" alt="Preview">
+        <div id="test-img-status" style="font-size:12px;margin-top:6px;color:var(--gray)"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- HOW TO USE TAB -->
+<div class="content" id="tab-howto" style="display:none">
+
+  <div class="card">
+    <div class="card-title">📖 How To Use This Admin Panel</div>
+
+    <div style="line-height:1.8;font-size:14px;color:var(--text)">
+
+      <div style="background:var(--light);border-radius:10px;padding:20px;margin-bottom:20px">
+        <div style="font-weight:700;font-size:16px;color:var(--navy);margin-bottom:12px">🔑 Login & Security</div>
+        <p>Default password is <code style="background:#e0e0e0;padding:2px 7px;border-radius:4px;font-weight:700">khetan2025</code>. Change it in the code by searching for <code>ADMIN_PASSWORD</code>.</p>
+      </div>
+
+      <div style="background:var(--light);border-radius:10px;padding:20px;margin-bottom:20px">
+        <div style="font-weight:700;font-size:16px;color:var(--navy);margin-bottom:12px">🏗️ Managing Products</div>
+        <ol style="padding-left:20px;display:flex;flex-direction:column;gap:8px">
+          <li>Go to the <strong>Products</strong> tab</li>
+          <li>Click <strong>"+ Add New Product"</strong> to add a product</li>
+          <li>Fill in the name, description, tag (optional), and image URL</li>
+          <li>Click the <strong>✏️ Edit</strong> button on any product to modify it</li>
+          <li>Click the <strong>🗑️ Delete</strong> button to remove a product</li>
+          <li>Click <strong>"Save Changes to Website"</strong> to apply all edits</li>
+        </ol>
+      </div>
+
+      <div style="background:var(--light);border-radius:10px;padding:20px;margin-bottom:20px">
+        <div style="font-weight:700;font-size:16px;color:var(--navy);margin-bottom:12px">🖼️ Changing Hero Slider Images</div>
+        <ol style="padding-left:20px;display:flex;flex-direction:column;gap:8px">
+          <li>Go to the <strong>Hero Slider</strong> tab</li>
+          <li>Click <strong>"+ Add New Slide"</strong> or <strong>✏️ Edit</strong> an existing slide</li>
+          <li>Paste a direct image URL (use the <strong>Image Hosting</strong> tab to learn how)</li>
+          <li>Click <strong>Save</strong> to apply</li>
+        </ol>
+      </div>
+
+      <div style="background:var(--light);border-radius:10px;padding:20px;margin-bottom:20px">
+        <div style="font-weight:700;font-size:16px;color:var(--navy);margin-bottom:12px">⚠️ Important: How Changes Work</div>
+        <p style="margin-bottom:10px">This admin panel stores data in your <strong>browser's local storage</strong>. To make changes visible on the live website, you have two options:</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+          <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px">
+            <div style="font-weight:700;color:var(--navy);margin-bottom:6px">Option A: Export & Upload</div>
+            <div style="font-size:13px;color:var(--gray)">Use the "Export HTML" button to download an updated index.html, then upload it to your GitHub repo.</div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px">
+            <div style="font-weight:700;color:var(--navy);margin-bottom:6px">Option B: Edit GitHub Directly</div>
+            <div style="font-size:13px;color:var(--gray)">Edit the data.json file directly in your GitHub repository for real-time updates.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:10px;padding:20px">
+        <div style="font-weight:700;font-size:16px;color:#856404;margin-bottom:8px">💡 Pro Tip: GitHub Pages + data.json</div>
+        <p style="color:#856404;font-size:13px">The most powerful setup: host your website on GitHub Pages, keep all product data in a <code>data.json</code> file in your repo, and edit it directly in GitHub's web editor. Changes go live in 1–2 minutes automatically!</p>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</div><!-- end admin-ui -->
+
+<!-- PRODUCT MODAL -->
+<div class="modal-overlay" id="product-modal">
+  <div class="modal">
+    <div class="modal-title" id="product-modal-title">Add Product</div>
+    <input type="hidden" id="edit-product-idx" value="-1">
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Product Name *</label>
+        <input type="text" class="form-input" id="pm-name" placeholder="e.g. Office Container">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tag / Badge (optional)</label>
+        <input type="text" class="form-input" id="pm-tag" placeholder="e.g. Popular, New, Luxury">
+      </div>
+    </div>
+    <div class="form-row full">
+      <div class="form-group">
+        <label class="form-label">Emoji Icon (for fallback)</label>
+        <input type="text" class="form-input" id="pm-emoji" placeholder="e.g. 🏢 🏠 🛡️ 🍽️">
+      </div>
+    </div>
+    <div class="form-row full">
+      <div class="form-group">
+        <label class="form-label">Description *</label>
+        <textarea class="form-textarea" id="pm-desc" placeholder="Short description of the product..."></textarea>
+      </div>
+    </div>
+    <div class="form-row full">
+      <div class="form-group">
+        <label class="form-label">Image URL</label>
+        <input type="url" class="form-input" id="pm-img" placeholder="https://..." oninput="previewProductImg(this.value)">
+        <img id="pm-img-preview" class="img-preview hidden" alt="Preview">
+        <div style="font-size:11px;color:var(--gray);margin-top:5px">Go to "Image Hosting" tab to learn how to get a free image URL</div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" onclick="closeProductModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProduct()">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE MODAL -->
+<div class="modal-overlay" id="slide-modal">
+  <div class="modal">
+    <div class="modal-title" id="slide-modal-title">Add Slide</div>
+    <input type="hidden" id="edit-slide-idx" value="-1">
+    <div class="form-row full">
+      <div class="form-group">
+        <label class="form-label">Slide Image URL *</label>
+        <input type="url" class="form-input" id="sm-url" placeholder="https://..." oninput="previewSlideImg(this.value)">
+        <img id="sm-img-preview" class="img-preview hidden" alt="Preview" style="height:180px">
+        <div style="font-size:11px;color:var(--gray);margin-top:5px">Use a wide/landscape image for best results (min 1200×600px recommended)</div>
+      </div>
+    </div>
+    <div class="form-row full">
+      <div class="form-group">
+        <label class="form-label">Alt Text (for SEO)</label>
+        <input type="text" class="form-input" id="sm-alt" placeholder="e.g. Khetan Industries Office Container Delhi">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" onclick="closeSlideModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSlide()">Save Slide</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===================== CONFIG =====================
+const ADMIN_PASSWORD = 'khetan2025'; // Change this!
+
+// ===================== DATA =====================
+let siteData = {
+  products: [
+    {name:'Office Containers',desc:'MS steel office containers for construction sites and commercial premises. Available in 10×20 and 20×40 ft with AC, windows, and full electrical wiring.',tag:'Popular',emoji:'🏢',img:'https://www.ashsan.in/image/container-office-and-home-1-18.jpg.jpg'},
+    {name:'Porta Cabins',desc:'Relocatable MS porta cabins for offices, temporary housing, or site accommodation. Lightweight, weatherproof, and installation-ready in any terrain.',tag:'',emoji:'🏠',img:'https://www.ashsan.in/image/container-office-and-home-1-3.jpg.jpg'},
+    {name:'Portable Toilet Containers',desc:'Sanitary toilet cabins with Indian/Western seat options and plumbing. Easy to install at remote sites, construction zones, or outdoor events.',tag:'Hygienic',emoji:'🚽',img:''},
+    {name:'Security Guard Cabins',desc:'Compact MS security cabins for guard duty, gate control, and surveillance posts. Durable, ventilated, and available in standard and custom sizes.',tag:'',emoji:'🛡️',img:''},
+    {name:'Restaurant Containers',desc:'Container-based restaurant and food stall structures for pop-ups, food courts, or permanent outlets. Ready to brand and fit-out to your design.',tag:'Unique',emoji:'🍽️',img:''},
+    {name:'MS Bunk Bed Containers',desc:'Space-efficient bunk bed cabins for staff accommodation at remote sites. Suitable for construction labour, industrial housing, and military use.',tag:'',emoji:'🛏️',img:''},
+    {name:'Used Shipping Containers',desc:'Economical second-hand containers for storage, conversion, and transportation. Inspected and certified before delivery.',tag:'',emoji:'📦',img:''},
+    {name:'Double Story Office Containers',desc:'Stackable two-level office containers maximizing space on busy project sites. Staircase, balcony, and partition options available.',tag:'Double Story',emoji:'🏗️',img:''},
+    {name:'Cold Storage Containers',desc:'Insulated cold storage containers with PUF panel lining for pharma, food, or dairy use. Temperature-controlled and energy-efficient.',tag:'',emoji:'🧊',img:''},
+    {name:'Portable Container Houses',desc:'Compact, relocatable homes with essential living features — bedroom, kitchen, bathroom — for any location across India.',tag:'',emoji:'🏡',img:''},
+    {name:'Luxury Container Offices',desc:'Fully fitted luxury container offices with vitrified tiles, false ceiling, AC, glass facade, and branded exteriors. Ideal for corporate site offices.',tag:'Luxury',emoji:'💎',img:''},
+    {name:'Portable Mobile Hospitals',desc:'Fully-equipped mobile medical cabins for rural outreach, disaster response, or remote healthcare deployment.',tag:'',emoji:'🏥',img:''}
+  ],
+  slider: [
+    {url:'https://www.ashsan.in/image/container-office-and-home-1-18.jpg.jpg',alt:'Khetan Industries Office Container Delhi'},
+    {url:'https://www.ashsan.in/image/container-office-and-home-1-3.jpg.jpg',alt:'Porta Cabin Manufacturer Delhi'},
+    {url:'https://www.ashsan.in/image/air-construction-office-photo.jpg',alt:'Construction Site Office Container'},
+    {url:'https://www.ashsan.in/image/community.jpg',alt:'Container Community Project'}
+  ]
+};
+
+// ===================== LOGIN =====================
+function doLogin() {
+  const pw = document.getElementById('admin-pass').value;
+  if (pw === ADMIN_PASSWORD) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-ui').style.display = 'block';
+    loadData();
+    renderProducts();
+    renderSlider();
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+    document.getElementById('admin-pass').style.borderColor = '#e74c3c';
+    setTimeout(() => { document.getElementById('admin-pass').style.borderColor = ''; }, 2000);
+  }
+}
+
+function doLogout() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('admin-ui').style.display = 'none';
+  document.getElementById('admin-pass').value = '';
+  document.getElementById('login-err').style.display = 'none';
+}
+
+// ===================== DATA PERSISTENCE =====================
+function loadData() {
+  const saved = localStorage.getItem('khetan_admin_data');
+  if (saved) { try { siteData = JSON.parse(saved); } catch(e) {} }
+}
+function saveData() {
+  localStorage.setItem('khetan_admin_data', JSON.stringify(siteData));
+}
+
+// ===================== TABS =====================
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('[id^="tab-"]').forEach(p => p.style.display = 'none');
+  event.target.classList.add('active');
+  document.getElementById('tab-' + tab).style.display = 'block';
+}
+
+// ===================== PRODUCTS =====================
+function renderProducts() {
+  const list = document.getElementById('products-list');
+  document.getElementById('product-count-badge').textContent = siteData.products.length + ' Products';
+  list.innerHTML = siteData.products.map((p, i) => `
+    <div class="product-item">
+      ${p.img
+        ? `<img src="${p.img}" class="product-item-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt="">`
+        : ''
+      }
+      <div class="product-item-img-fallback" style="${p.img ? 'display:none' : ''}">${p.emoji || '📦'}</div>
+      <div class="product-item-info">
+        <div class="product-item-name">${p.name}</div>
+        <div class="product-item-desc">${p.desc}</div>
+        ${p.tag ? `<span class="product-item-tag">${p.tag}</span>` : ''}
+      </div>
+      <div class="product-item-actions">
+        <button class="btn btn-sm btn-success" onclick="openEditProductModal(${i})">✏️ Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteProduct(${i})">🗑️ Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openAddProductModal() {
+  document.getElementById('product-modal-title').textContent = 'Add New Product';
+  document.getElementById('edit-product-idx').value = -1;
+  document.getElementById('pm-name').value = '';
+  document.getElementById('pm-tag').value = '';
+  document.getElementById('pm-emoji').value = '';
+  document.getElementById('pm-desc').value = '';
+  document.getElementById('pm-img').value = '';
+  document.getElementById('pm-img-preview').classList.add('hidden');
+  document.getElementById('product-modal').classList.add('open');
+}
+
+function openEditProductModal(idx) {
+  const p = siteData.products[idx];
+  document.getElementById('product-modal-title').textContent = 'Edit Product';
+  document.getElementById('edit-product-idx').value = idx;
+  document.getElementById('pm-name').value = p.name;
+  document.getElementById('pm-tag').value = p.tag || '';
+  document.getElementById('pm-emoji').value = p.emoji || '';
+  document.getElementById('pm-desc').value = p.desc;
+  document.getElementById('pm-img').value = p.img || '';
+  if (p.img) {
+    document.getElementById('pm-img-preview').src = p.img;
+    document.getElementById('pm-img-preview').classList.remove('hidden');
+  } else {
+    document.getElementById('pm-img-preview').classList.add('hidden');
+  }
+  document.getElementById('product-modal').classList.add('open');
+}
+
+function closeProductModal() {
+  document.getElementById('product-modal').classList.remove('open');
+}
+
+function saveProduct() {
+  const name = document.getElementById('pm-name').value.trim();
+  const desc = document.getElementById('pm-desc').value.trim();
+  if (!name || !desc) { showToast('Please fill in name and description', 'error'); return; }
+  const product = {
+    name, desc,
+    tag: document.getElementById('pm-tag').value.trim(),
+    emoji: document.getElementById('pm-emoji').value.trim() || '📦',
+    img: document.getElementById('pm-img').value.trim()
+  };
+  const idx = parseInt(document.getElementById('edit-product-idx').value);
+  if (idx === -1) {
+    siteData.products.push(product);
+    showToast('Product added successfully!', 'success');
+  } else {
+    siteData.products[idx] = product;
+    showToast('Product updated!', 'success');
+  }
+  saveData();
+  renderProducts();
+  closeProductModal();
+}
+
+function deleteProduct(idx) {
+  if (!confirm(`Delete "${siteData.products[idx].name}"? This cannot be undone.`)) return;
+  siteData.products.splice(idx, 1);
+  saveData();
+  renderProducts();
+  showToast('Product deleted', 'error');
+}
+
+function previewProductImg(url) {
+  const img = document.getElementById('pm-img-preview');
+  if (url) { img.src = url; img.classList.remove('hidden'); }
+  else { img.classList.add('hidden'); }
+}
+
+// ===================== SLIDER =====================
+function renderSlider() {
+  const list = document.getElementById('slider-list');
+  list.innerHTML = siteData.slider.map((s, i) => `
+    <div class="slider-item">
+      <img src="${s.url}" class="slider-item-img" onerror="this.style.opacity=0.3;this.style.filter='grayscale(1)'" alt="${s.alt}">
+      <div class="slider-item-body">
+        <div class="slider-active-badge">${i === 0 ? '★ First Slide' : 'Slide ' + (i+1)}</div>
+        <div class="slider-item-title">${s.alt || 'Slide ' + (i+1)}</div>
+        <div class="slider-item-actions">
+          <button class="btn btn-sm btn-success" onclick="openEditSlideModal(${i})">✏️ Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteSlide(${i})">🗑️</button>
+          ${i > 0 ? `<button class="btn btn-sm" style="background:var(--light);border:1px solid var(--border)" onclick="moveSlide(${i},-1)" title="Move up">↑</button>` : ''}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openAddSlideModal() {
+  document.getElementById('slide-modal-title').textContent = 'Add New Slide';
+  document.getElementById('edit-slide-idx').value = -1;
+  document.getElementById('sm-url').value = '';
+  document.getElementById('sm-alt').value = '';
+  document.getElementById('sm-img-preview').classList.add('hidden');
+  document.getElementById('slide-modal').classList.add('open');
+}
+
+function openEditSlideModal(idx) {
+  const s = siteData.slider[idx];
+  document.getElementById('slide-modal-title').textContent = 'Edit Slide';
+  document.getElementById('edit-slide-idx').value = idx;
+  document.getElementById('sm-url').value = s.url;
+  document.getElementById('sm-alt').value = s.alt || '';
+  document.getElementById('sm-img-preview').src = s.url;
+  document.getElementById('sm-img-preview').classList.remove('hidden');
+  document.getElementById('slide-modal').classList.add('open');
+}
+
+function closeSlideModal() {
+  document.getElementById('slide-modal').classList.remove('open');
+}
+
+function saveSlide() {
+  const url = document.getElementById('sm-url').value.trim();
+  if (!url) { showToast('Please enter an image URL', 'error'); return; }
+  const slide = { url, alt: document.getElementById('sm-alt').value.trim() };
+  const idx = parseInt(document.getElementById('edit-slide-idx').value);
+  if (idx === -1) {
+    siteData.slider.push(slide);
+    showToast('Slide added!', 'success');
+  } else {
+    siteData.slider[idx] = slide;
+    showToast('Slide updated!', 'success');
+  }
+  saveData();
+  renderSlider();
+  closeSlideModal();
+}
+
+function deleteSlide(idx) {
+  if (siteData.slider.length <= 1) { showToast('Need at least 1 slide', 'error'); return; }
+  siteData.slider.splice(idx, 1);
+  saveData();
+  renderSlider();
+  showToast('Slide deleted', 'error');
+}
+
+function moveSlide(idx, dir) {
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= siteData.slider.length) return;
+  [siteData.slider[idx], siteData.slider[newIdx]] = [siteData.slider[newIdx], siteData.slider[idx]];
+  saveData();
+  renderSlider();
+}
+
+function previewSlideImg(url) {
+  const img = document.getElementById('sm-img-preview');
+  if (url) { img.src = url; img.classList.remove('hidden'); }
+  else { img.classList.add('hidden'); }
+}
+
+// ===================== IMAGE TEST =====================
+function testImageURL(url) {
+  const img = document.getElementById('test-img-preview');
+  const status = document.getElementById('test-img-status');
+  if (!url) { img.classList.add('hidden'); status.textContent = ''; return; }
+  img.src = url;
+  img.classList.remove('hidden');
+  img.onload = () => { status.textContent = '✅ Image loaded successfully! This URL works.'; status.style.color = 'var(--green)'; };
+  img.onerror = () => { status.textContent = '❌ Could not load image. Check the URL or try a different one.'; status.style.color = 'var(--red)'; };
+}
+
+// ===================== TOAST =====================
+function showToast(msg, type = 'default') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => { t.className = 'toast'; }, 3000);
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) {
+      overlay.classList.remove('open');
+    }
+  });
+});
+
+// Generate & download exportable data.json
+function exportDataJSON() {
+  const json = JSON.stringify(siteData, null, 2);
+  const blob = new Blob([json], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'data.json';
+  a.click();
+  showToast('data.json downloaded!', 'success');
+}
+</script>
+</body>
+</html>
